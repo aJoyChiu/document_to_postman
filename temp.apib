@@ -1,0 +1,556 @@
+# Data Structures
+
+## Matched (object)
+
++ matched: `100` (number, required) - 件数
+
+## RewardPoints (object)
+
+- `tokuho_points` (array, optional) - トクホ商品の報酬値配列。`reward`の`giving_type`が`fixed`の場合は要素一つ、`daily`の場合は日数分の要素。
+    - 100 (number) - 報酬の値
+- `other` (array, optional) - トクホ以外の商品の報酬値配列。`reward`の`giving_type`が`fixed`の場合は要素一つ、`daily`の場合は日数分の要素。
+    - 100 (number) - 報酬の値
+
+## CommonProduct (object)
+
++ id: `XFEL5PABCD` (string, required) - 共通商品コード。[制限](./limit_value.md#common_product_id)
++ name: `ボスレインボーマウンテンブレンド185g缶` (string, required) - 商品名
++ is_tokuho: false (boolean, required) - トクホ飲料かどうか(true:トクホ飲料, false:一般飲料)
++ category: `コーヒー` (string, required) - 商品のカテゴリー
++ updated_at: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## CommonProductCreateParams (object)
+
++ id: `XFEL5PABCD` (string, required) - 共通商品コード。[制限](./limit_value.md#common_product_id)
++ name: `ボスレインボーマウンテンブレンド185g缶` (string, required) - 商品名
++ is_tokuho: false (boolean, required) - トクホ飲料かどうか(true:トクホ飲料, false:一般飲料)
++ category: `コーヒー` (string, required) - 商品のカテゴリー
+
+## CommonProductUpdateParams (object)
+
++ name: `ボスレインボーマウンテンブレンド185g缶` (string, required) - 商品名
++ is_tokuho: false (boolean, required) - トクホ飲料かどうか(true:トクホ飲料, false:一般飲料)
++ category: `コーヒー` (string, required) - 商品のカテゴリー
+
+## Operator (object)
+
++ `id`: `58d8e1163c00002e545d2341` (string, required) - オペレータID
++ `name`: `オペレータA` (string, required) - オペレータ名。[制限](./limit_value.md#medium_text)
++ `operator_product_code_rule`: `before` (enum[string], required) - 自販機商品コード変換ルール（`before`: 前に0をつける、 `after`: 後ろに0をつける、`other`: 自動付与しない）
+    + `before`
+    + `after`
+    + `other`
++ `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## OperatorUpdateParams (object)
+
++ `name`: `オペレータA` (string, required) - オペレータ名。[制限](./limit_value.md#medium_text)
++ `operator_product_code_rule`: `before` (enum[string], required) - 自販機商品コード変換ルール（`before`: 前に0をつける、 `after`: 後ろに0をつける、`other`: 自動付与しない）
+    + `before`
+    + `after`
+    + `other`
+
+## OperatorBranchUpdateParams (object)
+
++ `name`: `オペレータ支店A` (string, required) - オペレータ支店名。[制限](./limit_value.md#medium_text)
++ `zip_code`: `1234567` (string, required) - 郵便番号(ハイフンあり/なし)。[制限](./limit_value.md#zip_code)
++ `prefecture`: `東京都` (string, required) - 都道府県。[制限](./limit_value.md#tiny_text)
++ `address`: `新宿区テスト町１－２－３` (string, required) - 市区郡町丁目以下。[制限](./limit_value.md#medium_text)
++ `phone_number`: `03-1234-5678` (string, required) - 電話番号。[制限](./limit_value.md#phone_number)
+
+## OperatorBranch (OperatorBranchUpdateParams)
+
++ `id`: `58d8de87250000762a0fb90a_F1234567` (string, required) - オペレータ支店ID。[制限](./limit_value.md#operator_branch_id)
++ `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## OperatorBranchCreateParams (OperatorBranchUpdateParams)
+
++ `id`: `58d8de87250000762a0fb90a_F1234567` (string, required) - オペレータ支店ID。[制限](./limit_value.md#operator_branch_id)
+
+## OperatorProduct (object)
+
++ id: `58d8de87250000762a0fb90a_uZ8cie3oEeghoo9Eshi6ni9U` (string, required) - オペレータ商品ID。[制限](./limit_value.md#operator_product_id)
++ type: `type` (enum[string], required) - 共通商品コードに対する登録タイプ（`normal`: 登録あり、 `empty`: 登録なし）
+    + `normal`
+    + `empty`
++ operator_product_code: `1111` (string, required, nullable) - オペレータ商品コード。`type`が`empty`の場合は値は`null`になる。[制限](./limit_value.md#operator_product_code)
++ operator_vm_code: `00000000001111` (string, required, nullable) - 自販機商品コード。`type`が`empty`の場合は値は`null`になる。[制限](./limit_value.md#operator_vm_code)
++ common_product_id: `XFEL5PABCD` (string, required) - 共通商品コード。[制限](./limit_value.md#common_product_id)。
++ note: `備考` (string, required) - 備考。[制限](./limit_value.md#long_text_including_newline)
++ updated_at: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## OperatorProductCreateParams (object)
+
++ operator_id: `58d8e1163c00002e545d2341` (string, required) - オペレータID
++ type: `type` (enum[string], required) - 共通商品コードに対する登録タイプ（`normal`: 登録あり、 `empty`: 登録なし）
+    + `normal`
+    + `empty`
++ operator_product_code: `1111` (string, required, nullable) - オペレータ商品コード。`type`が`empty`の場合は`null`を指定する必要がある。[制限](./limit_value.md#operator_product_code)
++ operator_vm_code: `00000000001111` (string, required, nullable) - 自販機商品コード。`type`が`empty`の場合は`null`を指定する必要がある。[制限](./limit_value.md#operator_vm_code)
++ common_product_id: `XFEL5PABCD` (string, required) - 共通商品コード。[制限](./limit_value.md#common_product_id)
++ note: `備考` (string, required) - 備考。[制限](./limit_value.md#long_text_including_newline)
+
+## OperatorProductUpdateParams (object)
+
++ type: `type` (enum[string], required) - 共通商品コードに対する登録タイプ（`normal`: 登録あり、 `empty`: 登録なし）
+    + `normal`
+    + `empty`
++ operator_product_code: `1111` (string, required, nullable) - オペレータ商品コード。`type`が`empty`の場合は`null`を指定する必要がある。[制限](./limit_value.md#operator_product_code)
++ operator_vm_code: `00000000001111` (string, required, nullable) - 自販機商品コード。`type`が`empty`の場合は`null`を指定する必要がある。[制限](./limit_value.md#operator_vm_code)
++ common_product_id: `XFEL5PABCD` (string, required) - 共通商品コード。[制限](./limit_value.md#common_product_id)。
++ note: `備考` (string, required) - 備考。[制限](./limit_value.md#long_text_including_newline)
+
+## CommonPointGivingType (enum)
+共通ポイントの付与先。
+
+### Members
++ `primary_common_point`
++ `dcm_point`
++ `pnt_point`
++ `none`
+
+## Coupon (object)
+
++ id: `0123456789ABCDEF` (string, required) - クーポンコード (pattern: `^[0-9A-F]{16}$`)
++ title: `クーポンタイトル` (string, required) - クーポンタイトル
++ start_date: `2019-01-01` (string, required) - 開始日(YYYY-MM-DD形式、JST)
++ end_date: `2019-01-31` (string, required) - 終了日(YYYY-MM-DD形式、JST)
++ reward (object, required)
+    + green_point: `5` (number, required) - G+ポイント
+    + common_point: `5` (number, required) - 共通ポイント
+    + common_point_giving_type (CommonPointGivingType, required)
++ limit: `1` (number, required) - 利用ユーザ数上限。0：無制限
++ note: `特別クーポン` (string, required) - 備考
++ use_number: `0` (number, required) - 現在の利用ユーザ数。クーポン利用のたびにインクリメントする。 利用回数がlimitを超える場合、UIではlimitの値を表示する（但しlimitが0の場合を除く）
+
+## CouponParams (object)
+
++ title: `クーポンタイトル` (string, required) - クーポンタイトル
++ start_date: `2019-01-01` (string, required) - 開始日(YYYY-MM-DD形式、JST)
++ end_date: `2019-01-31` (string, required) - 終了日(YYYY-MM-DD形式、JST)
++ reward (object, required)
+    + green_point: `5` (number, required) - G+ポイント
+    + common_point: `5` (number, required) - 共通ポイント
+    + common_point_giving_type (CommonPointGivingType, required)
++ limit: `1` (number, required) - 利用ユーザ数上限。0：無制限
++ note: `特別クーポン` (string, required) - 備考
+
+## Campaign (object)
+
+- `id`: `unique_id_of_this_document` (string, required) - ドキュメントのID
+- `title`: `キャンペーンA` (string, required) - キャンペーン名
+- `note`: `キャンペーン説明文` (string, required) - キャンペーンの詳細
+- `start_date`: `2020-09-01` (string, required) - キャンペーンの開始日。YYYY-MM-DDフォーマット(日本時間)
+- `end_date`: `2020-09-01` (string, required) - キャンペーンの終了日。YYYY-MM-DDフォーマット(日本時間)
+- `type`: `single_purchase` (string, required) - `single_purchase`:1本購入キャンペーン、`multi_purchase`:複数本購入キャンペーン、`walking`:ウォーキングキャンペーン、`walking_and_purchase`:ウォーキング＆購入キャンペーン
+- `goal`
+    - `buy`: 1 (number, optional) - 購入本数。`type`が`single_purchase`か`multi_purchase`か`walking_and_purchase`の場合に必須
+    - `male_steps`: 1000 (number, optional) - 男性の歩数目標。`type`が`walking`か`walking_and_purchase`の場合に必須
+    - `female_steps`: 1000 (number, optional) - 女性の歩数目標。`type`が`walking`か`walking_and_purchase`の場合に必須
+- `reward`
+    - `type`: `point_amount` (string, required) - `point_amount`：ポイント数、`point_multiplier`：ポイント倍率。`type`が`single_purchase`の場合は`point_amount`か`point_multiplier`のどちらかになるが、`type`がそれ以外の場合は`point_amount`になる
+    - `common_point_giving_type` (CommonPointGivingType, required)
+    - `giving_type`: `fixed` (string, required) - 報酬の付与方式。`fixed`:全期間で固定のポイント方式、`daily`:日毎に異なるポイント方式のいずれかの値をとる
+    - `green_point` (RewardPoints, optional) - 報酬G+ポイント。`reward`の`type`が`point_amount`か`point_multiplier`の場合に必須、その他の場合は指定不可
+    - `common_point` (RewardPoints, optional) - 報酬共通ポイント。`reward`の`type`が`point_amount`か`point_multiplier`の場合に必須、その他の場合は指定不可
+- `product_ids` (array, required) - 対象商品IDのリスト
+    - `aaa` (string) - 対象商品ID
+- `target`
+    - `type`: `all` (string, required) - 対象のユーザタイプ。`all`：全ユーザ、`consumer_group`：ユーザグループのいずれかの値をとる
+    - `consumer_group_id`: `ccc` (string, optional) - 対象グループID。`target`の`type`が`consumer_group`の場合に必須、その他の場合は指定不可
+    - `achieve_limit_by_user`: 0 (number, optional) - 1ユーザが達成可能なキャンペーン数。0: 制限なし、1以上: キャンペーン数上限
+
+## Message (object)
+
++ id: `58d8de87250000762a0fb90a` (string, required) - メッセージID
++ download_url: `https://...` (string, optional) - ダウンロードURL。このフィールドはメッセージ画像がアップロード済みかつメッセージ取得APIの場合に存在する。
++ upload_url: `https://...` (string, optional) - アップロードURL。このフィールドはメッセージ作成/メッセージ更新APIの場合に存在する。
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ message: `二十歳の頃の体への近道は、遠回りして歩くことかも。` (string, required) - メッセージ(改行あり2000文字まで)
++ open_date: `2019-01-01` (string, required) - 表示日(pattern: /^\d{4}-\d{2}-\d{2}\$/)
++ note: `特別キャンペーン` (string, required) - 備考(改行あり2000文字まで)
+
+## MessageUpdateParams (object)
+
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ message: `二十歳の頃の体への近道は、遠回りして歩くことかも。` (string, required) - メッセージ(改行あり2000文字まで)
++ open_date: `2019-01-01` (string, required) - 表示日(pattern: /^\d{4}-\d{2}-\d{2}\$/)
++ note: `特別キャンペーン` (string, required) - 備考(改行あり2000文字まで)
+
+## Banner (object)
+
++ id: `58d8e151250000ac2a0fb986` (string, required) - バナーID
++ download_url: `https://...` (string, optional) - ダウンロードURL。このフィールドはバナー画像がアップロード済みかつバナー取得APIの場合に存在する。
++ upload_url: `https://...` (string, optional) - アップロードURL。このフィールドはバナー作成/バナー更新APIの場合に存在する。
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ start_date: `2019-01-01` (string, required) - バナー表示の開始日。YYYY-MM-DDフォーマット(日本時間)
++ end_date: `2019-01-31` (string, required) - バナー表示の最終日。YYYY-MM-DDフォーマット(日本時間)
++ order: `1` (number, required) - アプリでの表示順(大きい順に表示する)。0以上999以下の整数
++ url: `https://...` (string, required) - アプリで選択時にブラウザで開くURL(形式はURLもしくは空文字列)
++ target (object, required)
+    + type: `all` (string, required) - 対象のユーザタイプ。`all`：全ユーザ、`consumer_group`：ユーザグループのいずれかの値をとる
+    + consumer_group_id: `ccc` (string, optional) - 対象グループID。`target`の`type`が`consumer_group`の場合に必須、その他の場合は指定不可
++ note: `特別キャンペーン` (string, required) - 備考(改行あり2000文字まで)
++ updated_at: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## BannerUpdateParams (object)
+
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ start_date: `2019-01-01` (string, required) - バナー表示の開始日。YYYY-MM-DDフォーマット(日本時間)
++ end_date: `2019-01-31` (string, required) - バナー表示の最終日。YYYY-MM-DDフォーマット(日本時間)
++ order: `1` (number, required) - アプリでの表示順(大きい順に表示する)。0以上999以下の整数
++ url: `https://...` (string, required) - アプリで選択時にブラウザで開くURL(形式はURLもしくは空文字列)
++ target (object, required)
+    + type: `all` (string, required) - 対象のユーザタイプ。`all`：全ユーザ、`consumer_group`：ユーザグループのいずれかの値をとる
+    + consumer_group_id: `ccc` (string, optional) - 対象グループID。`target`の`type`が`consumer_group`の場合に必須、その他の場合は指定不可
++ note: `特別キャンペーン` (string, required) - 備考(改行あり2000文字まで)
+
+## BackgroundImage (object)
+
++ id: `58d8de87250000762a0fb90a` (string, required) - 背景画像ID
++ download_url: `https://...` (string, optional) - ダウンロードURL。このフィールドは背景画像がアップロード済みかつ背景画像取得APIの場合に存在する。
++ upload_url: `https://...` (string, optional) - アップロードURL。このフィールドは背景画像作成/背景画像更新APIの場合に存在する。
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ start_date: `2019-01-01` (string, required) - 背景画像表示の開始日。YYYY-MM-DDフォーマット(日本時間)
++ end_date: `2019-01-31` (string, required) - 背景画像表示の最終日。YYYY-MM-DDフォーマット(日本時間)
++ note: `特別背景画像` (string, required) - 備考(改行あり2000文字まで)
+
+## BackgroundImageUpdateParams (object)
+
++ filename: `myimage.png` (string, required) - ファイル名
++ content_type: `image/png` (string, required) - ファイルのコンテントタイプ
++ size: `100` (number, required) - ファイルサイズ
++ start_date: `2019-01-01` (string, required) - 背景画像表示の開始日。YYYY-MM-DDフォーマット(日本時間)
++ end_date: `2019-01-31` (string, required) - 背景画像表示の最終日。YYYY-MM-DDフォーマット(日本時間)
++ note: `特別背景画像` (string, required) - 備考(改行あり2000文字まで)
+
+## Announcement (object)
+
++ id: `58d8de87250000762a0fb90a` (string, required) - お知らせID
++ start_date: `2019-01-01T00:00:00+00:00` (string, required) - 開始日時(ISO 8601形式のUTC時刻)
++ end_date: `2019-01-31T23:59:59+00:00` (string, required) - 終了日時(ISO 8601形式のUTC時刻)
++ date: `2019-01-01` (string, required) - お知らせに表示される日付(pattern: /^\d{4}-\d{2}-\d{2}\$/)
++ title: `タイトル` (string, required) - タイトル(改行なし250文字まで)
++ text: `お知らせの内容` (string, required) - お知らせの内容(改行あり2000文字まで)
+
+## AnnouncementCreateParams (object)
+
++ start_date: `2019-01-01T00:00:00+00:00` (string, required) - 開始日時(ISO 8601形式のUTC時刻)
++ end_date: `2019-01-31T23:59:59+00:00` (string, required) - 終了日時(ISO 8601形式のUTC時刻)
++ date: `2019-01-01` (string, required) - お知らせに表示される日付(pattern: /^\d{4}-\d{2}-\d{2}\$/)
++ title: `タイトル` (string, required) - タイトル(改行なし250文字まで)
++ text: `お知らせの内容` (string, required) - お知らせの内容(改行あり2000文字まで)
+
+## AnnouncementUpdateParams (object)
+
++ start_date: `2019-01-01T00:00:00+00:00` (string, required) - 開始日時(ISO 8601形式のUTC時刻)
++ end_date: `2019-01-31T23:59:59+00:00` (string, required) - 終了日時(ISO 8601形式のUTC時刻)
++ date: `2019-01-01` (string, required) - お知らせに表示される日付(pattern: /^\d{4}-\d{2}-\d{2}\$/)
++ title: `タイトル` (string, required) - タイトル(改行なし250文字まで)
++ text: `お知らせの内容` (string, required) - お知らせの内容(改行あり2000文字まで)
+
+## FcodeMasterUpdateParams (object)
+
++ company_name: `テスト株式会社` (string, required) - 会社名
++ branch_name: `テスト支店` (string, required) - 支店名
++ zip_code: `1234567` (string, required) - 郵便番号(ハイフンあり/なし)。[制限](./limit_value.md#zip_code)
++ prefecture: `東京都` (string, required) - 都道府県
++ city: `新宿区` (string, required) - 市区郡
++ address_line: `テスト町１－２－３` (string, required) - 町丁目以下
++ phone_number: `0312345678` (string, required) - 電話番号(ハイフンあり) (pattern: `\A[0-9-]{0,20}\z`)
+
+## FcodeMaster (FcodeMasterUpdateParams)
+
++ id: `F1234567` (string, required) - Fコード。[制限](./limit_value.md#fcode)
+
+## MerchantUpdateParams (object)
+
++ `name`: `設置企業A` (string, required) - 設置企業名。[制限](./limit_value.md#medium_text)
++ `tokuho_setting_id`: `58d8de87250000762a0fb90a` (string, required, nullable) - トクホ設定ID(指定がない場合はデフォルトの設定(トクホの日：19日、トクホタイム：0:00-1:00(UTC))を適用する)
+
+## Merchant (MerchantUpdateParams)
+
++ `id`: `58d8de87250000762a0fb90a` (string, required) - 設置企業ID
++ `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## MinimumAppVersion (object)
+
++ `android` (required)
+    + minimum_app_version: `1.0.0` (string, required) - 最小バージョン（アプリがこのバージョン未満の場合にアップデートを促す）（フォーマット：(major).(minor).(patch)）
+    + title: `タイトル` (string, required) - アプリが`minimum_app_version`未満の場合にアプリで表示するタイトル
+    + text: `テキスト` (string, required) - アプリが`minimum_app_version`未満の場合にアプリで表示するテキスト
++ `ios` (required)
+    + minimum_app_version: `1.0.0` (string, required) - 最小バージョン（アプリがこのバージョン未満の場合にアップデートを促す）（フォーマット：(major).(minor).(patch)）
+    + title: `タイトル` (string, required) - アプリが`minimum_app_version`未満の場合にアプリで表示するタイトル
+    + text: `テキスト` (string, required) - アプリが`minimum_app_version`未満の場合にアプリで表示するテキスト
+
+## ConsumerUser (StepAmount)
+
++ `gender`: `male` (enum[string], required) - 性別（`male`: 男性、 `female`: 女性、`none`: 未選択）
+    + `male`
+    + `female`
+    + `none`
++ `birth_year`: `2000` (number, required) - 誕生年（`YYYY`）
++ `prefecture`: `01` (string, required) - 都道府県（JIS X0401の半角数字2桁又は未登録を表す`00`）
++ `primary_common_point`: `dcm_point` (enum[string], required) - 優先共通ポイント（`dcm_point`:dポイント、`pnt_point`:Pontaポイント、`none`:未設定）
+    + `dcm_point`
+    + `pnt_point`
+    + `none`
++ `os`: `ios` (enum[string], required) - 使用OS
+    + `ios`
+    + `android`
++ `os_version`: `12.0.0` (string, required) - OSバージョン
++ `model_name`: `iPhone XS` (string, required) - 機種名
++ `carrier`: `docomo` (string, required) - キャリア
++ `app_version`: `1.0.0` (string, required) - アプリバージョン
++ `green_point`: `100` (number, required) - G+ポイント残高
++ `green_money_list` (array[GreenMoney], fixed) - G+マネー一覧
++ `common_point` (array[object], fixed) - 連携済共通ポイント（連携済の共通ポイントがない場合は空配列）
+    + (enum[string])
+        + `dcm_point`
+        + `pnt_point`
++ `steps` (object) - 週間歩数
+    + *`2019-1` (string)*: 3000 (number) - 週ごとの歩数。`key`が`${YEAR}-{WEEK_NUMBER}`で表現される週番号で、`value`が歩数。
++ `toppan` (object) - 凸版の会員情報取得APIのレスポンスの `consumers` の値。詳細は[凸版のAPI仕様書](https://drive.google.com/drive/folders/1ZlfU9Dp1GuIqUmJZj1RQQbyz4X2WcTQT)を参照。
+
+## PointBalance (object)
+
++ `balance`: `1000` (number, required) - ポイント残高
+
+## GreenMoney (object)
+
++ `amount`: `120` (number, required) - 金額
++ `expires_at`: `2020-1-13T05:22:56.000+00:00` (string, required) - 有効期限（UTC, ISO8601）
++ `processed_at`: `2019-12-13T05:22:56.000+00:00` (string, required) - 処理日時（UTC, ISO8601）
+
+## GreenPointHistory (object)
+
++ `id`: `507f1f77bcf86cd799439011` (string, required) - ポイント履歴ID
++ `title`: `バッジGET！` (string, required) - タイトル
++ `text`: `10万歩達成` (string, required) - 表示文章
++ `type`: `walking_mission_complete` (enum[string], required) - 履歴表示タイプ (タイプ一覧は [ポイント履歴](./dodai_resources/consumer_wallet_collection.md#%E3%83%9D%E3%82%A4%E3%83%B3%E3%83%88%E5%B1%A5%E6%AD%B4) 参照)
++ `processed_at`: `2019-12-13T05:22:56.000+00:00` (string, required) - 処理日時（UTC, ISO8601）
++ `points` (array[object], fixed) - ポイント
+    + (object)
+        + `brand`: `green_point` (enum[string], required) -ブランド （`green_point`:G+ポイント、`dcm_point`:dポイント、`pnt_point`:Pontaポイント）
+            + `green_point`
+            + `dcm_point`
+            + `pnt_point`
+        + `amount`: `120` (number, required) - ポイント数
+
+## GreenMoneyHistory (object)
+
++ `id`: `507f1f77bcf86cd799439011` (string, required) - マネー履歴ID
++ `title`: `飲料購入` (string, required) - タイトル
++ `text`: `特茶` (string, required) - 表示文章
++ `type`: `purchase_with_green_money` (enum[string], required) - 履歴表示タイプ (タイプ一覧は [G+マネー履歴](./dodai_resources/consumer_wallet_collection.md#g%E3%83%9E%E3%83%8D%E3%83%BC%E5%B1%A5%E6%AD%B4) 参照)
++ `amount`: `120` (number, required) - 金額
++ `expires_at`: `2019-12-13T05:22:56.000+00:00` (string, nullable) - 有効期限（UTC, ISO8601）、加算の場合のみ。
++ `processed_at`: `2019-12-13T05:22:56.000+00:00` (string, required) - 処理日時（UTC, ISO8601）
+
+## AdjustmentAmount (object)
+
++ `amount`: `200` (number, required) - 調整量（1以上の整数)
+
+## StepAdjustmentAmount (object)
+
++ `steps`: `1000` (string, required) - 調整する歩数（１以上の整数）
++ `mission_id`: `58d8de87250000762a0fb90a` (string, required) - 対象のミッションID
+
+## StepAmount (object)
+
++ `total_steps`: `10000` (number, required) - 累積歩数
++ `mission_total_steps` (object) - ミッション累積歩数
+    + *`58d8de87250000762a0fb90a` (string)*: *10000* (number) - ミッションごとの累計歩数。`key`がミッションIDで、`value`が歩数。
+
+## Terminal (TerminalCreateParams)
+
+- `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## TerminalCreateParams (TerminalUpdateParams)
+
+- `id`: `58d8de8725000` (string, required) - 自販機ID (ITAの端末IDおよびpoint連携時の端末NOとしても使用する) [制限](./limit_value.md#terminal_id)
+
+## TerminalSettingLocation (object)
+
+- `merchant_id`: `58d8de87250000762a0fb90a` (string, nullable) - 設置企業ID
+- `merchant_branch_name`: `東京支店` (string, required) - 設置先支店／所属名称 [制限](./limit_value.md#medium_text)
+- `name`: `設置先` (string, required) - 設置先名称 [制限](./limit_value.md#medium_text)
+- `zip_code`: `1234567` (string, required) - 郵便番号(ハイフンあり/なし) [制限](./limit_value.md#zip_code)
+- `prefecture`: `東京都`(string, required) - 都道府県 [制限](./limit_value.md#tiny_text)
+- `address_line1`: `新宿区テスト町１－２－３` (string, required) - 市区町村以下 [制限](./limit_value.md#medium_text)
+- `address_line2`: `テストビル３階` (string, required) - ビル名/階数 [制限](./limit_value.md#medium_text)
+
+## TerminalApplicant (object)
+
+- `name`: `申請担当` (string, required) - 氏名 [制限](./limit_value.md#medium_text)
+- `phone_number`: `0312345678` (string, nullable) - 電話番号(電話番号、携帯電話番号のいずれか必須) [制限](./limit_value.md#phone_number)
+- `mobile_phone_number`: `09012345678` (string, nullable) - 携帯電話番号(電話番号、携帯電話番号のいずれか必須) [制限](./limit_value.md#phone_number)
+- `mail_address`: `abc@example.com` (string, required) - メールアドレス [制限](./limit_value.md#mail_address)
+
+## TerminalApplicationSsl (object)
+
+- `company_code`: `ssl` (fixed, required) - 会社コード(`ssl`:サントリービバレッジソリューション(株))
+- `sfno`: `12345678-1` (string, nullable) - SFNO(自販機ドキュメントの作成時(Web申請時)には管理番号はまだ決まっておらず、その後で登録される場合がある。) [制限](./limit_value.md#sfno)
+- `ssl_apply_no`: `01234567` (string, nullable) - SSL作業申請No(Web申請時、sfnoが未設定かつ会社コードが `ssl` の場合、 `ssl_apply_no` を設定) [制限](./limit_value.md#apply_no)
+
+## TerminalApplicationSbv (object)
+
+- `company_code`: `sbv` (fixed, required) - 会社コード(`sbv`:サントリービバレッジサービス(株))
+- `sfno`: `12345678-1` (string, nullable) - SFNO(自販機ドキュメントの作成時(Web申請時)には管理番号はまだ決まっておらず、その後で登録される場合がある。) [制限](./limit_value.md#sfno)
+- `sbv_apply_no`: `98765432` (string, nullable) - SBV作業申請No(Web申請時、sfnoが未設定かつ会社コードが `sbv` の場合、 `sbv_apply_no` を設定) [制限](./limit_value.md#apply_no)
+
+## TerminalUpdateParams (object)
+
+- `franchise_id`: `0123456789ABCDEabcde` (string, required) - 加盟店ID [制限](./limit_value.md#medium_text)
+- `type`: `型式` (string, required) - 型式 [制限](./limit_value.md#short_text)
+- `secret`: `0123456789ABCDEF` (string, required) - 決済端末認証キー(登録時に自動生成、TBD)
+- `operator_branch_id`: `58d8de87250000762a0fb90a_F1234567` (string, required) - オペレータ支店ID [制限](./limit_value.md#operator_branch_id)
+- `setting_location` (TerminalSettingLocation, required) - 設置先情報
+- `applicant` (TerminalApplicant, required) - 申請者情報
+- One Of
+  - `application` (TerminalApplicationSsl, required) - 申請情報
+  - `application` (TerminalApplicationSbv, required) - 申請情報
+
+## TokuhoSetting (TokuhoSettingUpdateParams)
+
++ `id`: `58d8de87250000762a0fb90a` (string, required) - トクホ設定ID
++ `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## TokuhoSettingUpdateParams (object)
+
++ `title` (string, required) - トクホ設定名
++ `tokuho_day` (object, required) - トクホの日に関する設定
+  + `day`: `15` (number, required) - 設定日(JST)。毎月存在する日付で、`1`〜`28`の値。
+  + `green_point`: `5` (number, required) - 報酬G+ポイント
++ `tokuho_time` (object, required) - トクホタイムに関する設定
+  + `start_hour`: `9` (number, required) - 開始時間(JST)
+  + `end_hour`: `10` (number, required)  - 終了時間(JST)
+  + `green_point`: `5` (number, required) - 報酬G+ポイント
+
+## Transaction (object)
+
+
++ `id`: `123456781234567820190101` (string, required) - 決済ID
++ `status`: `paid` (string, required) - 処理状態
++ `refund_target_id`: `123456781234567820190101` (string, required, nullable) - 返金対象決済ID
++ `refunded_at`: `2019-01-01T00:00:00+00:00` (string, required, nullable) - 返金日時
++ `consumer_id`: `2705d3cfdd190b0897738db9e` (string, required, nullable) - 消費者ID
++ `terminal_id`: `fcmdsa5w27cha` (string, required, nullable) - 決済端末ID
++ `sfno`: `12345678-1` (string, required, nullable) - SFNO(自販機ドキュメントの作成時(Web申請時)には管理番号はまだ決まっておらず、その後で登録される場合がある。) [制限](./limit_value.md#sfno)
++ `operator_branch_id`: `58d8de87250000762a0fb90a_F1234567` (string, required, nullable) - オペレーター支部ID
++ `applied_by_comparison_at`: `2019-01-31T23:50:99.000+00:00` (string, required, nullable) - 突合によって決済処理された日時
++ `code_info` (object, required, nullable) - カード情報
+    + `type`: `qr_code` (string, required) - アプリ利用/カード利用
+    + `method`: `pay` (string, required) - 利用種別
+    + `brand`: `green_money` (string, required) - ブランドタイプ
++ `history` (object, required) - 履歴
+    + `type`: `green_money` (string, required) - 取引種別
+    + `sub_type`: `other_drink` (string, required) - 取引種別 (小区分)
+    + `processed_at`: `2019-01-01T00:00:00+00:00` (string, required) - 処理日時
+    + `price`: `120` (number, required, nullable) - 商品の価格
+    + `product_code`: `00000000001111` (string, required, nullable) - 自販機商品コード
+    + `green_money`: `-120` (number, required) - グリーンマネー
+    + `green_point`: `0` (number, required) - グリーンポイント
+    + `dcm_point`: `0` (number, required) - ドコモポイント
+    + `pnt_point`: `0` (number, required) - ポンタポイント
+    + `common_product_id`: `XFEL5PABCD` (number, required, nullable) - 共通商品ID
+    + `campaign_id`: `58d8de87250000762a0fb90a` (number, required, nullable) - キャンペーンID
+    + `mission_id`: `58d8de87250000762a0aefjgf` (number, required, nullable) - ミッション ID
+    + `coupon_id`: `0123456789ABCDEF` (number, required, nullable) - クーポンID
+    + `walking_week_number`: `2019-1` (string, required, nullable) - ウォーキングキャンペーンを達成した週番号
+    + `refund_green_money_list` (array, required) - 返金グリーンマネー一覧
+        + `amount`: `1000` (number, required) - 返金額
+        + `processed_at`: `2019-01-01T00:00:00+00:00` (string, required) - 課金処理日時
+        + `origin`: `consumer` (string, required) - 回収金の判定に利用する
+
+## DownloadFile (object)
+
++ `id`: `20190101` (string, required) - ファイルID。YYYYMMDD形式(JST)
+
+## DownloadFileDetail (DownloadFile)
+
++ `download_url`: `https://...` (string, required) - ダウンロードURL
+
+## MonthlyAggregation (object)
+
++ `id`: `201901` (string, required) - 月次情報ID。YYYYMM形式(JST)
++ `green_point` (object, required) - G+ポイントの情報
+    + `balance`: `100000` (number, required) - 残高
+    + `supply`: `10000` (number, required) - 発行額
+    + `used`: `10000` (number, required) - 使用額
++ `green_money` (object, required) - G+マネーの情報
+    + `consumer` (object, required) - 消費者によって発行されたマネーの集計情報
+        + `balance`: `1000000` (number, required) - 残高
+        + `supply`: `1000` (number, required) - 発行額
+        + `revocation`: `1000` (number, required) - 失効額
+        + `used`: `10000` (number, required) - 使用額
+    + `operator` (object, required) - 運営からの進呈されたマネーの集計情報
+        + `balance`: `1000000` (number, required) - 残高
+        + `supply`: `1000` (number, required) - 発行額
+        + `revocation`: `1000` (number, required) - 失効額
+        + `used`: `10000` (number, required) - 使用額
+
+## DownloadMonthlyAggregationFile (object)
+
++ `id`: `201901` (string, required) - ファイルID。YYYYMM形式(JST)
+
+## DownloadMonthlyAggregationFileDetail (DownloadFile)
+
++ `download_url`: `https://...` (string, required) - ダウンロードURL
+
+## ApplicationForm (ApplicationFormCreateParams)
+
+- `id`: `F1234567_20190804170000_58d8de8725000076` (string, required) - 申請ID
+- `download_url`: `https://...` (string, optional) - ダウンロードURL。このフィールドはCSVがアップロード済みかつWEB申請取得APIのレスポンスの場合に存在する。
+- `upload_url`: `https://...` (string, optional) - アップロードURL。このフィールドはWEB申請作成APIのレスポンスの場合に存在する。
+- `updated_at`: `2013-10-22T13:27:46+00:00` (string, required) - 更新日時(ISO 8601形式のUTC時刻)
+
+## ApplicationFormApplication (object)
+
+- `company_code`: `ssl` (enum[string], required) - 会社コード(`ssl`:サントリービバレッジソリューション(株)、`sbv`:サントリービバレッジサービス(株)のいずれか)
+- `sfno`: `12345678-1` (string, nullable) - SFNO(自販機ドキュメントの作成時(Web申請時)には管理番号はまだ決まっておらず、その後で登録される場合がある。) [制限](./limit_value.md#sfno)
+- `asset_no`: `1234` (string, required) - 資産NO(G+未使用申請のみ) [制限](./limit_value.md#short_text)
+- `ssl_apply_no`: `01234567` (string, nullable) - SSL作業申請No(Web申請時、sfnoが未設定かつ会社コードが `ssl` の場合、 `ssl_apply_no` を設定) [制限](./limit_value.md#apply_no)
+- `sbv_apply_no`: `98765432` (string, nullable) - SBV作業申請No(Web申請時、sfnoが未設定かつ会社コードが `sbv` の場合、 `sbv_apply_no` を設定) [制限](./limit_value.md#apply_no)
+
+## ApplicationFormDevice (object)
+
+- `use_ic_cards` (array, required) - 利用ICカードのリスト
+  - `traffic` (string) - 利用ICカード (要素の一覧は[利用ICカード](./dodai_resources/application_form_collection.md#利用ICカード)参照)
+- `train_company_division`: `11` (number, nullable) - 事業者区分(PASMO機の場合に指定、タイプ一覧は[事業者区分](./dodai_resources/application_form_collection.md#事業者区分)参照)
+- `needs_printer`: `true` (boolean, required) - プリンター(要/不要)
+- `needs_universal`: `true` (boolean, required) - ユニバーサル(要/不要)
+
+## ApplicationFormTerminal (object)
+
+- `terminal_id`: `58d8de8725000` (string, nullable) - 自販機ID(G+利用申請のみ) [制限](./limit_value.md#terminal_id)
+- `franchise_id`: `0123456789ABCDEabcde` (string, required) - 加盟店ID [制限](./limit_value.md#medium_text)
+- `name`: `自販機A` (string, required) - 機種名(G+未使用申請のみ) [制限](./limit_value.md#short_text)
+- `application` (ApplicationFormApplication, required) - 申請情報
+- `device` (ApplicationFormDevice, required) - 端末情報
+- `setting_date`: `2019-01-01` (string, required) - 機材取付予定日(YYYY-MM-DD形式、JST) [制限](./limit_value.md#tiny_text)
+- `setting_location` (TerminalSettingLocation, required) - 設置先情報
+
+## ApplicationFormCreateParams (object)
+
+- `filename`: `my_application_form.csv` (string, required) - ファイル名
+- `content_type`: `text/csv` (string, required) - ファイルのコンテントタイプ
+- `size`: `1000` (number, required) - ファイルサイズ
+- `applicant` (object, required) - 申請者情報
+  - `department_code`: `ABC` (string, required) - 部署コード [制限](./limit_value.md#medium_text)
+  - `contact_person` (TerminalApplicant, required) - 担当者
+- `franchise` (object, required) - 加盟店情報
+  - `fcode`: `F1234567` (string, required) - Fコード [制限](./limit_value.md#fcode)
+  - `operator_branch_id`: `58d8de87250000762a0fb90a_F1234567` (string, nullable) - オペレータ支店ID(G+利用申請のみ) [制限](./limit_value.md#operator_branch_id)
+- `terminals` (array[ApplicationFormTerminal], fixed) - 自販機情報(最大50件)
