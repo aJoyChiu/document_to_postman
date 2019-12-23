@@ -9,14 +9,11 @@ def read_all_files(path):
     f = open(path + "/" + single_file, 'r')
     data_list = f.readlines()
     for index in range(len(data_list)):
-      print(index)
-      print(len(data_list))
       if(index < len(data_list)-2):
         if(re.match(r"^\##.*\(object\)\n", data_list[index]) != None and re.search(r"^\s*(-|\+).*", data_list[index+2]) == None):
           data_list.pop(index+2)
       if(index < len(data_list)):
         temp += data_list[index]
-        print(data_list[index])
     temp = temp.replace("# Data Structures", "")
     f.close()
   return temp
