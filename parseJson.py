@@ -83,7 +83,6 @@ def parse_data_structure():
     for datastruc in list(datastrucList):
         if(datastruc.find("_object_") != -1):
             name = re.sub(r"_object_.*", "", datastruc)
-            # print(datastrucList)
             for strucName in list(datastrucList):
                 if(strucName.find(re.sub(r".*_object_", "", datastruc) + "_object_") == 0):
                     datastrucList = replaceObj(strucName, datastrucList)

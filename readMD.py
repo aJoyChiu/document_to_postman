@@ -3,6 +3,13 @@ import json
 import sys
 from parseJson import parse_data_structure
 
+inAPI = False
+inParameter = False
+inRequest = False
+inHeader = False
+inBody = False
+inDataStructure = False
+
 class ApiTemplate():
     def __init__(self, name, path, method):
         self.name = name
@@ -72,19 +79,13 @@ def matchType(match):
         return ""
     return typeCase.get(match.group(1), match.group(1))
 
-file_name = 'dashboard_apis'
+file_name = ((sys.argv[1].split('/'))[-1].split('.'))[0]
 file_path = sys.argv[1]
 f = open(file_path, "r")
 dataStrucList = parse_data_structure()
 # print(dataStrucList)
 apiList = list()
 apiList.append(ApiTemplate("","",""))
-inAPI = False
-inParameter = False
-inRequest = False
-inHeader = False
-inBody = False
-inDataStructure = False
 txt = {
     "info": {
         "name": file_name,
@@ -116,6 +117,7 @@ def getDataStructure(setence):
     return struc, _type
 
 for setence in f.read().split("\n"):
+    # determine this line is in which category
     if(setence[0:16] == "# Data Structure"):
         inDataStructure = True
     if(setence[0:2] == "##" and inDataStructure is False):
@@ -127,6 +129,8 @@ for setence in f.read().split("\n"):
     elif(setence == ""):
         inAPI = False
         inParameter = False
+
+    # after checking this line's work, then doing its job
     if(inAPI):
         name, path, method, parameter = getAPI(setence, apiList[-1])
         apiList.append(ApiTemplate(name, path, method))
