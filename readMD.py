@@ -1,6 +1,7 @@
 import re
 import json
 import sys
+import os
 from parseJson import parse_data_structure
 
 inAPI = False
@@ -9,6 +10,14 @@ inRequest = False
 inHeader = False
 inBody = False
 inDataStructure = False
+allDataStructure = parse_data_structure()
+outputJson = {
+    "info": {
+        "name": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": []
+}
 
 class ApiTemplate():
     def __init__(self, name, path, method):
@@ -20,49 +29,55 @@ class ApiTemplate():
         self.body = {}
         self.isBodyArray = False
     def print_element(self):
-        print([self.name, self.path, self.method, self.header, self.body])
+        print([self.name, self.path, self.method, self.parameter, self.header, self.body])
 
-def getAPI(setence, lastApi):
+def getAPI(sentence, lastApi):
     name = ""
     path = ""
     method = ""
     parameter = []
-    if(setence[0:3] == "## " and setence.find("[") != -1):
-        name, _, APIpath = setence[3:].partition(" [")
+    if(sentence[0:3] == "## " and sentence.find("[") != -1):
+        name, _, APIpath = sentence[3:].partition(" [")
         if(APIpath[0:1] != "/" and APIpath != ""):
             method, _, path = APIpath.partition(" ")
             path = re.split(r"({\?|\?{).*", path)[0]
             path = "{{url}}" + path.replace("{", ":").replace("}", "")
             path = path.replace("]", "")
         elif(APIpath[0:1] == "/" and APIpath != ""):
-            path = re.split(r"({\?|\?{).*", APIpath[1:])[0]
-            path = "{{url}}/" + path.replace("{", ":").replace("}", "")
-            path = path.replace("]", "")
-    elif(setence[0:3] == "###" and setence.find("[") != -1):
-        name, _, _ = setence[4:].partition(" [")
+            splitUrlAndParams = re.split(r"{\?|\?{", APIpath)
+            path = splitUrlAndParams[0]
+            if(len(splitUrlAndParams) == 1):
+                path = "{{url}}" + path.replace("{", ":").replace("}", "")
+                path = path.replace("]", "")
+            else:
+                params = "?" + splitUrlAndParams[1].replace(",", "=123&").replace("}", "") + "=123"
+                path = "{{url}}" + path.replace("{", ":").replace("}", "") + params
+                path = path.replace("]", "")
+    elif(sentence[0:3] == "###" and sentence.find("[") != -1):
+        name, _, _ = sentence[4:].partition(" [")
         path = lastApi.path
         parameter = lastApi.parameter
-        method = re.search(r"\[\w+[\] ]", setence[3:]).group(0)
+        method = re.search(r"\[\w+[\] ]", sentence[3:]).group(0)
         method = re.sub(r"[^A-Z]", "", method)
     return name, path, method, parameter
 
-def getParemeter(setence):
+def getParemeter(sentence):
     parameter = None
-    if(setence[0:1] != "+"):
-        parameter = re.search(r"\`\w+\`:", setence)
+    if(sentence[0:1] != "+"):
+        parameter = re.search(r"\`\w+\`:", sentence)
         if(parameter != None):
             parameter = parameter.group(0)
             parameter = re.sub(r"[^\w]", "", parameter)
     return parameter
 
-def getRequestHeader(setence):
-    header = re.search(r"\w+:", setence)
+def getRequestHeader(sentence):
+    header = re.search(r"\w+:", sentence)
     if(header != None):
         header = header.group(0).replace(":", "")
     return header
 
-def getRequestBody(setence):
-    body = re.search(r"\+ `(\w+)`[:| \(]", setence)
+def getRequestBody(sentence):
+    body = re.search(r"\+ `(\w+)`[:| \(]", sentence)
     if(body != None):
         body = body.group(1)
     return body
@@ -79,100 +94,30 @@ def matchType(match):
         return ""
     return typeCase.get(match.group(1), match.group(1))
 
-file_name = ((sys.argv[1].split('/'))[-1].split('.'))[0]
-file_path = sys.argv[1]
-f = open(file_path, "r")
-dataStrucList = parse_data_structure()
-# print(dataStrucList)
-apiList = list()
-apiList.append(ApiTemplate("","",""))
-txt = {
-    "info": {
-        "name": file_name,
-        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-    },
-    "item": []
-}
-
-def getDataStructure(setence):
+def getDataStructure(sentence):
     struc = ""
     _type = ""
-    if(setence[0:3] == "## "):
-        match = re.search(r"^## (\w+) \((\w+)\)", setence)
+    if(sentence[0:3] == "## "):
+        match = re.search(r"^## (\w+) \((\w+)\)", sentence)
         struc = match.group(1)
         _type = match.group(2)
         if(_type == "object"):
             dataStruc = (struc, {})
         else:
             dataStruc = (struc, "")
-        dataStrucList.append(dataStruc)
-    elif(re.search(r"\+ `(\w+)`", setence) != None):
-        match = re.search(r"\+ `(\w+)`", setence)
+        allDataStructure.append(dataStruc)
+    elif(re.search(r"\+ `(\w+)`", sentence) != None):
+        match = re.search(r"\+ `(\w+)`", sentence)
         struc = match.group(1)
-        _type = matchType(re.search(r"\((\w+)", setence))
-        (name, strucType) = dataStrucList[-1]
-        if(type(strucType) == dict and re.search(r"optional\)", setence) == None):
+        _type = matchType(re.search(r"\((\w+)", sentence))
+        (name, strucType) = allDataStructure[-1]
+        if(type(strucType) == dict and re.search(r"optional\)", sentence) == None):
             strucType[struc] = _type
-            dataStrucList[-1] = (name, strucType)
+            allDataStructure[-1] = (name, strucType)
     return struc, _type
 
-for setence in f.read().split("\n"):
-    # determine this line is in which category
-    if(setence[0:16] == "# Data Structure"):
-        inDataStructure = True
-    if(setence[0:2] == "##" and inDataStructure is False):
-        inAPI = True
-    elif(setence[0:11] == "+ Parameter"):
-        inParameter = True
-    elif(setence[0:9] == "+ Request"):
-        inRequest = True
-    elif(setence == ""):
-        inAPI = False
-        inParameter = False
-
-    # after checking this line's work, then doing its job
-    if(inAPI):
-        name, path, method, parameter = getAPI(setence, apiList[-1])
-        apiList.append(ApiTemplate(name, path, method))
-        apiList[-1].parameter = parameter
-    if(inParameter):
-        parameter = getParemeter(setence)
-        if(parameter != None and re.search(r"optional\)", setence) == None):
-            apiList[-1].parameter.append(parameter)
-    if(inDataStructure):
-        getDataStructure(setence)
-    if(inRequest):
-        if(setence[0:10] == "+ Response"):
-            inHeader = False
-            inBody = False
-            inRequest = False
-            continue
-        elif(re.search(r"\+ Header", setence) != None):
-            inHeader = True
-            inBody = False
-        elif(re.search(r"\+ Attribute", setence) != None):
-            if(re.search(r"\(array", setence) != None):
-                apiList[-1].isBodyArray = True
-            inBody = True
-            inHeader = False
-            matchObj = re.search(r"[\(array\[|\(]([A-Z]\w+)", setence)
-            if(matchObj != None):
-                apiList[-1].body = {"waitObject": matchObj.group(1)}
-                inBody = False
-        if(inHeader):
-            header = getRequestHeader(setence)
-            if(header != None):
-                apiList[-1].header.append(header)
-        if(inBody):
-            body = getRequestBody(setence)
-            if(body != None and re.search(r"optional\)", setence) == None):
-                bodyObj = re.search(r"\+ .*[\(|\(array\[]([A-Z]\w+)", setence)
-                apiList[-1].body[body] = ""
-                if(bodyObj != None):
-                    apiList[-1].body[body] = {"waitObject": bodyObj.group(1)}
-
 def findDataStruct(key):
-    for name in list(dataStrucList):
+    for name in list(allDataStructure):
         if(name == key):
             return name
     return "error_body"
@@ -184,24 +129,15 @@ def findDataStruct(key):
 #     return False
 
 # index = 0
-# for (name, struct) in dataStrucList:
+# for (name, struct) in allDataStructure:
 #     for key in struct:
 #         if(isDefalutValue(struct[key]) is False):
 #             structIndex = findDataStruct(struct[key])
 #             if(type(structIndex) == int):
-#                 (_, inStruct) = dataStrucList[structIndex]
+#                 (_, inStruct) = allDataStructure[structIndex]
 #                 struct[key] = inStruct
-#                 dataStrucList[index] = (name, struct)
+#                 allDataStructure[index] = (name, struct)
 #     index += 1
-
-index = 0
-for i in apiList:
-    if(i.method != ""):
-        if("waitObject" in i.body):
-            structKey = findDataStruct(apiList[index].body["waitObject"])
-            req_body = dataStrucList[structKey]
-            apiList[index].body = req_body
-    index += 1
 
 ## Generate Json file
 def genHeaders(headers, body):
@@ -245,8 +181,8 @@ def genBody(body):
         "raw": np
     }
 
-def addApi(name, url, method, parameter, header, body):
-    txt["item"].append({
+def addApi(outputFile, name, url, method, parameter, header, body):
+    outputFile["item"].append({
         "name": name,
         "request": {
             "method": method,
@@ -255,11 +191,105 @@ def addApi(name, url, method, parameter, header, body):
             "url": genUrl(url)
         }
     })
+    return outputFile
 
-for i in apiList:
-    if(i.method != ""):
-        addApi(i.name, i.path, i.method, i.parameter, i.header, i.body)
-# print(txt)
+def openMultipleFiles(file_path):
+    fileList = os.listdir(file_path)
+    for singleFile in fileList:
+        currentPath = file_path + '/' +singleFile
+        if(os.path.isdir(currentPath)):
+            openMultipleFiles(currentPath)
+        else:
+            isApiFile = re.match(r".*((_api|_apis)\.md)$", singleFile)
+            if(isApiFile != None):
+                f = open(currentPath, "r")
+                fileName = (singleFile.split('.'))[0]
+                print('start parsing ' + fileName + ': ')
+                apiList = []
+                apiList.append(ApiTemplate("","",""))
+                inAPI = False
+                inParameter = False
+                inRequest = False
+                inHeader = False
+                inBody = False
+                inDataStructure = False
+                outputJson = {
+                    "info": {
+                        "name": fileName,
+                        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+                    },
+                    "item": []
+                }
 
-with open(file_name +".json", "w") as fp:
-    json.dump(txt, fp, indent=2, ensure_ascii=False)
+                for sentence in f.read().split("\n"):
+                    # determine this line is in which category
+                    if(sentence[0:16] == "# Data Structure"):
+                        inDataStructure = True
+                    if(sentence[0:2] == "##" and inDataStructure is False):
+                        inAPI = True
+                    elif(sentence[0:11] == "+ Parameter"):
+                        inParameter = True
+                    elif(sentence[0:9] == "+ Request"):
+                        inRequest = True
+                    elif(sentence == ""):
+                        inAPI = False
+                        inParameter = False
+
+                    # after checking this line's work, then doing its job
+                    if(inAPI):
+                        name, path, method, parameter = getAPI(sentence, apiList[-1])
+                        apiList.append(ApiTemplate(name, path, method))
+                        apiList[-1].parameter = parameter
+                    if(inParameter):
+                        parameter = getParemeter(sentence)
+                        if(parameter != None and re.search(r"optional\)", sentence) == None):
+                            apiList[-1].parameter.append(parameter)
+                    if(inDataStructure):
+                        getDataStructure(sentence)
+                    if(inRequest):
+                        if(sentence[0:10] == "+ Response"):
+                            inHeader = False
+                            inBody = False
+                            inRequest = False
+                            continue
+                        elif(re.search(r"\+ Header", sentence) != None):
+                            inHeader = True
+                            inBody = False
+                        elif(re.search(r"\+ Attribute", sentence) != None):
+                            if(re.search(r"\(array", sentence) != None):
+                                apiList[-1].isBodyArray = True
+                            inBody = True
+                            inHeader = False
+                            matchObj = re.search(r"[\(array\[|\(]([A-Z]\w+)", sentence)
+                            if(matchObj != None):
+                                apiList[-1].body = {"waitObject": matchObj.group(1)}
+                                inBody = False
+                        if(inHeader):
+                            header = getRequestHeader(sentence)
+                            if(header != None):
+                                apiList[-1].header.append(header)
+                        if(inBody):
+                            body = getRequestBody(sentence)
+                            if(body != None and re.search(r"optional\)", sentence) == None):
+                                bodyObj = re.search(r"\+ .*[\(|\(array\[]([A-Z]\w+)", sentence)
+                                apiList[-1].body[body] = ""
+                                if(bodyObj != None):
+                                    apiList[-1].body[body] = {"waitObject": bodyObj.group(1)}
+                index = 0
+                for api in apiList:
+                    if(api.method != ""):
+                        if("waitObject" in api.body):
+                            structKey = findDataStruct(apiList[index].body["waitObject"])
+                            req_body = allDataStructure[structKey]
+                            apiList[index].body = req_body
+                    index += 1
+                for i in apiList:
+                    if(i.method != ""):
+                        outputJson = addApi(outputJson, i.name, i.path, i.method, i.parameter, i.header, i.body)
+
+                with open(fileName +".json", "w") as fp:
+                    json.dump(outputJson, fp, indent=2, ensure_ascii=False)
+
+
+apiDirPath = sys.argv[1]
+openMultipleFiles(apiDirPath)

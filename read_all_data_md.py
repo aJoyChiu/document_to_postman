@@ -16,9 +16,9 @@ def read_all_files(path):
         data_list = f.readlines()
         for index in range(len(data_list)):
           if(index < len(data_list)-2):
-            match_object_line = re.match(r"^\##.*\(object\)\n", data_list[index])
-            match_wrong_object_form = re.search(r"^\s*(-|\+).*", data_list[index+2])
-            if(match_object_line != None and match_wrong_object_form == None):
+            match_object_line = re.match(r"^##.*\(object\)\n$", data_list[index])
+            match_object_form = re.search(r"^\s*(-|\+).*", data_list[index+2])
+            if(match_object_line != None and match_object_form == None):
               data_list.pop(index+2)
           if(index < len(data_list)):
             temp += data_list[index]

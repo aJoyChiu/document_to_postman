@@ -39,15 +39,15 @@ def readData(_list):
 def parse_data_structure():
     name = ""
     f = open("save_by_drafter.json")
-    a = json.load(f)
+    originData = json.load(f)
     final = {}
-    datastrucList = {}
+    dataStructures = {}
 
-    a = loadDict(a, 'content')
-    a = loadDict(a, 'content')
-    a = loadDict(a, 'content')
+    originData = loadDict(originData, 'content')
+    originData = loadDict(originData, 'content')
+    originData = loadDict(originData, 'content')
 
-    for struc in a:
+    for struc in originData:
         struc = struc['content']
         name = struc["meta"]["id"]['content']
         if(struc["element"] == "enum"):
@@ -77,61 +77,61 @@ def parse_data_structure():
                     final[key] = [value]
                 else:
                     final[key] = value
-        datastrucList[name] = final
+        dataStructures[name] = final
         final = {}
 
-    for datastruc in list(datastrucList):
+    for datastruc in list(dataStructures):
         if(datastruc.find("_object_") != -1):
             name = re.sub(r"_object_.*", "", datastruc)
-            for strucName in list(datastrucList):
+            for strucName in list(dataStructures):
                 if(strucName.find(re.sub(r".*_object_", "", datastruc) + "_object_") == 0):
-                    datastrucList = replaceObj(strucName, datastrucList)
-            if(datastruc in datastrucList):
-                datastrucList[name] = {**datastrucList[datastruc], **datastrucList[re.sub(r".*_object_", "", datastruc)]}
-                datastrucList.pop(datastruc)
+                    dataStructures = replaceObj(strucName, dataStructures)
+            if(datastruc in dataStructures):
+                dataStructures[name] = {**dataStructures[datastruc], **dataStructures[re.sub(r".*_object_", "", datastruc)]}
+                dataStructures.pop(datastruc)
             datastruc = name
-        struc = datastrucList[datastruc]
+        struc = dataStructures[datastruc]
         for index in struc:
             if(type(struc[index]) == dict):
-                datastrucList[datastruc][index] = findObject(struc[index], datastrucList)
+                dataStructures[datastruc][index] = findObject(struc[index], dataStructures)
             elif(type(struc[index]) == list and type(struc[index][0]) == str):
                 isObject = struc[index][0].find("object_")
                 if(isObject != -1):
                     objName = struc[index][0].replace("object_", "")
-                    datastrucList[datastruc][index][0] = datastrucList.get(objName, "object=>" + objName)
+                    dataStructures[datastruc][index][0] = dataStructures.get(objName, "object=>" + objName)
             elif(type(struc[index]) == str):
                 isObject = struc[index].find("object_")
                 if(isObject != -1):
                     objName = struc[index].replace("object_", "")
-                    datastrucList[datastruc][index] = datastrucList.get(objName, "object=>" + objName)
+                    dataStructures[datastruc][index] = dataStructures.get(objName, "object=>" + objName)
 
-    return datastrucList
+    return dataStructures
 
-def replaceObj(datastruc, datastrucList):
+def replaceObj(datastruc, dataStructures):
     if(datastruc.find("_object_") != -1):
         name = re.sub(r"_object_.*", "", datastruc)
-        for strucName in datastrucList:
+        for strucName in dataStructures:
             if(strucName.find(re.sub(r".*_object_", "", datastruc) + "_object_") == 0):
-                datastrucList = replaceObj(strucName, datastrucList)
-        datastrucList[name] = {**datastrucList[datastruc], **datastrucList[re.sub(r".*_object_", "", datastruc)]}
-        datastrucList.pop(datastruc)
+                dataStructures = replaceObj(strucName, dataStructures)
+        dataStructures[name] = {**dataStructures[datastruc], **dataStructures[re.sub(r".*_object_", "", datastruc)]}
+        dataStructures.pop(datastruc)
         datastruc = name
-    return datastrucList
+    return dataStructures
 
-def findObject(struc, datastrucList):
+def findObject(struc, dataStructures):
     for index in struc:
         if(type(struc[index]) == dict):
-            struc[index] = findObject(struc[index], datastrucList)
+            struc[index] = findObject(struc[index], dataStructures)
         elif(type(struc[index]) == list and type(struc[index][0]) == str):
             isObject = struc[index][0].find("object_")
             if(isObject != -1):
                 objName = struc[index][0].replace("object_", "")
-                struc[index][0] = datastrucList.get(objName, "object=>" + objName)
+                struc[index][0] = dataStructures.get(objName, "object=>" + objName)
         elif(type(struc[index]) == str):
             isObject = struc[index].find("object_")
             if(isObject != -1):
                 objName = struc[index].replace("object_", "")
-                struc[index] = datastrucList.get(objName, "object=>" + objName)
+                struc[index] = dataStructures.get(objName, "object=>" + objName)
     return struc
 
 ## If only run this file, run the function below
