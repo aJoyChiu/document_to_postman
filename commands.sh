@@ -1,5 +1,5 @@
-echo "run read_all_data_md.py"
-python3 read_all_data_md.py $1
+echo "run readAllDataMd.py"
+python3 readAllDataMd.py $1
 
 echo "run drafter to parse data apib to json"
 drafter -o save_by_drafter.json -f json temp.apib

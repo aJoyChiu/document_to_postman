@@ -28,6 +28,7 @@ class ApiTemplate():
         self.header = []
         self.body = {}
         self.isBodyArray = False
+    # For debug
     def print_element(self):
         print([self.name, self.path, self.method, self.parameter, self.header, self.body])
 
@@ -193,10 +194,10 @@ def addApi(outputFile, name, url, method, parameter, header, body):
     })
     return outputFile
 
-def openMultipleFiles(file_path):
-    fileList = os.listdir(file_path)
+def openMultipleFiles(filePath):
+    fileList = os.listdir(filePath)
     for singleFile in fileList:
-        currentPath = file_path + '/' +singleFile
+        currentPath = filePath + '/' + singleFile
         if(os.path.isdir(currentPath)):
             openMultipleFiles(currentPath)
         else:
@@ -275,17 +276,22 @@ def openMultipleFiles(file_path):
                                 apiList[-1].body[body] = ""
                                 if(bodyObj != None):
                                     apiList[-1].body[body] = {"waitObject": bodyObj.group(1)}
-                index = 0
+                deleteIndexList = []
+                for index, api in enumerate(apiList):
+                    if(api.method == ""):
+                        deleteIndexList.append(index)
+                deleteIndexList.reverse()
+                for index in deleteIndexList:
+                    apiList.pop(index)
+
+                for index, api in enumerate(apiList):
+                    if("waitObject" in api.body):
+                        structKey = findDataStruct(apiList[index].body["waitObject"])
+                        req_body = allDataStructure[structKey]
+                        apiList[index].body = req_body
+
                 for api in apiList:
-                    if(api.method != ""):
-                        if("waitObject" in api.body):
-                            structKey = findDataStruct(apiList[index].body["waitObject"])
-                            req_body = allDataStructure[structKey]
-                            apiList[index].body = req_body
-                    index += 1
-                for i in apiList:
-                    if(i.method != ""):
-                        outputJson = addApi(outputJson, i.name, i.path, i.method, i.parameter, i.header, i.body)
+                    outputJson = addApi(outputJson, api.name, api.path, api.method, api.parameter, api.header, api.body)
 
                 with open(fileName +".json", "w") as fp:
                     json.dump(outputJson, fp, indent=2, ensure_ascii=False)

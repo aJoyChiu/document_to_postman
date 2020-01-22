@@ -2,13 +2,13 @@ import os
 import sys
 import re
 
-def read_all_files(path):
+def readAllFiles(path):
   files_list = os.listdir(path)
   temp = ""
   for single_file in files_list:
     current_path = path + "/" + single_file
     if(os.path.isdir(current_path)):
-      temp += read_all_files(current_path)
+      temp += readAllFiles(current_path)
     else:
       # check this file is data structure file or not
       if(re.match(r".*_data_structures\.md$", single_file) != None):
@@ -28,7 +28,7 @@ def read_all_files(path):
 
 # document_path = sys.argv[1]
 data_dir_path = sys.argv[1]
-all_in_one_file = "# Data Structures" + read_all_files(data_dir_path)
+all_in_one_file = "# Data Structures" + readAllFiles(data_dir_path)
 
 f = open("temp.apib", "w")
 f.write(all_in_one_file)
