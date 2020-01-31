@@ -55,16 +55,6 @@ def getAPI(sentence, lastApi):
             path = re.split(r"({\?|\?{).*", APIpath[1:])[0]
             path = "{{url}}/" + path.replace("{", ":").replace("}", "")
             path = path.replace("]", "")
-            # splitUrlAndParams = re.split(r"{\?|\?{", APIpath)
-            # path = splitUrlAndParams[0]
-            # if(len(splitUrlAndParams) == 1):
-            #     path = "{{url}}" + path.replace("{", ":").replace("}", "")
-            #     path = path.replace("]", "")
-            # else:
-            #     params = "?" + splitUrlAndParams[1].replace(",", "=123&").replace("}", "") + "=123"
-            #     path = "{{url}}" + path.replace("{", ":").replace("}", "") + params
-            #     path = path.replace("]", "")
-
     elif(sentence[0:3] == "###" and sentence.find("[") != -1):
         name, _, _ = sentence[4:].partition(" [")
         path = lastApi.path
@@ -84,8 +74,8 @@ def getParemeter(sentence):
     if(sentence[0:1] != "+"):
         parameter = re.findall(r"\`(\w+)\`", sentence)
         if(parameter != []):
-            key = parameter[0]
             if(len(parameter) >= 2):
+                key = parameter[0]
                 value = parameter[1]
     return key, value
 
@@ -101,39 +91,40 @@ def getRequestBody(sentence):
         body = body.group(1)
     return body
 
-typeCase = {
-        "string": "",
-        "array": [],
-        "number": 0,
-        "boolean": False,
-    }
+# typeCase = {
+#         "string": "",
+#         "array": [],
+#         "number": 0,
+#         "boolean": False,
+#     }
 
-def matchType(match):
-    if(match is None):
-        return ""
-    return typeCase.get(match.group(1), match.group(1))
+# def matchType(match):
+#     if(match is None):
+#         return ""
+#     return typeCase.get(match.group(1), match.group(1))
 
-def getDataStructure(sentence):
-    struc = ""
-    _type = ""
-    if(sentence[0:3] == "## "):
-        match = re.search(r"^## (\w+) \((\w+)\)", sentence)
-        struc = match.group(1)
-        _type = match.group(2)
-        if(_type == "object"):
-            dataStruc = (struc, {})
-        else:
-            dataStruc = (struc, "")
-        allDataStructure.append(dataStruc)
-    elif(re.search(r"\+ `(\w+)`", sentence) != None):
-        match = re.search(r"\+ `(\w+)`", sentence)
-        struc = match.group(1)
-        _type = matchType(re.search(r"\((\w+)", sentence))
-        (name, strucType) = allDataStructure[-1]
-        if(type(strucType) == dict and re.search(r"optional\)", sentence) == None):
-            strucType[struc] = _type
-            allDataStructure[-1] = (name, strucType)
-    return struc, _type
+# def getDataStructure(sentence, objName):
+#     structureName = objName
+#     _type = ""
+#     if(sentence[0:3] == "## "):
+#         match = re.search(r"^## (\w+) \((\w+)\)", sentence)
+#         structureName = match.group(1)
+#         _type = match.group(2)
+#         # if(_type == "object"):
+#         #     dataStruc = (structureName, {})
+#         # else:
+#         #     dataStruc = (structureName, "")
+#         # print(dataStruc)
+#         # allDataStructure[structureName]
+#     elif(re.search(r"\+ `(\w+)`", sentence) != None):
+#         match = re.findall(r"`(\w+)`", sentence)
+#         struc = match.group(1)
+#         _type = matchType(re.search(r"\((\w+)", sentence))
+#         (name, strucType) = allDataStructure[-1]
+#         if(type(strucType) == dict and re.search(r"optional\)", sentence) == None):
+#             strucType[struc] = _type
+#             allDataStructure[-1] = (name, strucType)
+#     return struc, _type
 
 def findDataStruct(key):
     for name in list(allDataStructure):
@@ -265,8 +256,10 @@ def openMultipleFiles(filePath):
                         isInMethod = False
                     elif(sentence[0:11] == "+ Parameter"):
                         inParameter = True
+                        inRequest = False
                     elif(sentence[0:9] == "+ Request"):
                         inRequest = True
+                        inParameter = False
                     elif(sentence == ""):
                         inAPI = False
                         inParameter = False
@@ -277,6 +270,7 @@ def openMultipleFiles(filePath):
                         apiList.append(ApiTemplate(name, path, method))
                         if(isLocalParam is False):
                             apiList[-1].parameter = parameter
+                        inAPI = False
                     if(inParameter):
                         key, value = getParemeter(sentence)
                         if(key != None):
@@ -284,8 +278,6 @@ def openMultipleFiles(filePath):
                                 apiList[-1].parameter[key] = value
                             else:
                                 apiList[-1].query[key] = value
-                    if(inDataStructure):
-                        getDataStructure(sentence)
                     if(inRequest):
                         if(sentence[0:10] == "+ Response"):
                             inHeader = False
