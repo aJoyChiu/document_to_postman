@@ -193,6 +193,10 @@ def genUrl(url, apiParameter, apiQuery):
     }
 
 def genBody(body):
+    if(body == {}):
+        return {
+            "mode": "none"
+        }
     np = json.dumps(body, indent=2, ensure_ascii=False)
     return {
         "mode": "raw",
