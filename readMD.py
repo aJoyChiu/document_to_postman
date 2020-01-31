@@ -5,11 +5,14 @@ import os
 from parseJson import parse_data_structure
 
 inAPI = False
+isInMethod = False
+isLocalParam = False
 inParameter = False
 inRequest = False
 inHeader = False
 inBody = False
 inDataStructure = False
+paramList = []
 allDataStructure = parse_data_structure()
 outputJson = {
     "info": {
@@ -24,52 +27,67 @@ class ApiTemplate():
         self.name = name
         self.path = path
         self.method = method
-        self.parameter = []
+        self.parameter = {}
+        self.query = {}
         self.header = []
         self.body = {}
         self.isBodyArray = False
     # For debug
     def print_element(self):
-        print([self.name, self.path, self.method, self.parameter, self.header, self.body])
+        return [self.name, self.path, self.method, self.parameter, self.query, self.header, self.body]
 
 def getAPI(sentence, lastApi):
     name = ""
     path = ""
     method = ""
-    parameter = []
+    parameter = {}
     if(sentence[0:3] == "## " and sentence.find("[") != -1):
         name, _, APIpath = sentence[3:].partition(" [")
+        param = re.findall(r"\{(\w+)\}", sentence)
+        global paramList
+        paramList = param
         if(APIpath[0:1] != "/" and APIpath != ""):
             method, _, path = APIpath.partition(" ")
             path = re.split(r"({\?|\?{).*", path)[0]
             path = "{{url}}" + path.replace("{", ":").replace("}", "")
             path = path.replace("]", "")
         elif(APIpath[0:1] == "/" and APIpath != ""):
-            splitUrlAndParams = re.split(r"{\?|\?{", APIpath)
-            path = splitUrlAndParams[0]
-            if(len(splitUrlAndParams) == 1):
-                path = "{{url}}" + path.replace("{", ":").replace("}", "")
-                path = path.replace("]", "")
-            else:
-                params = "?" + splitUrlAndParams[1].replace(",", "=123&").replace("}", "") + "=123"
-                path = "{{url}}" + path.replace("{", ":").replace("}", "") + params
-                path = path.replace("]", "")
+            path = re.split(r"({\?|\?{).*", APIpath[1:])[0]
+            path = "{{url}}/" + path.replace("{", ":").replace("}", "")
+            path = path.replace("]", "")
+            # splitUrlAndParams = re.split(r"{\?|\?{", APIpath)
+            # path = splitUrlAndParams[0]
+            # if(len(splitUrlAndParams) == 1):
+            #     path = "{{url}}" + path.replace("{", ":").replace("}", "")
+            #     path = path.replace("]", "")
+            # else:
+            #     params = "?" + splitUrlAndParams[1].replace(",", "=123&").replace("}", "") + "=123"
+            #     path = "{{url}}" + path.replace("{", ":").replace("}", "") + params
+            #     path = path.replace("]", "")
+
     elif(sentence[0:3] == "###" and sentence.find("[") != -1):
         name, _, _ = sentence[4:].partition(" [")
         path = lastApi.path
-        parameter = lastApi.parameter
+        # parameter = lastApi.parameter
         method = re.search(r"\[\w+[\] ]", sentence[3:]).group(0)
         method = re.sub(r"[^A-Z]", "", method)
     return name, path, method, parameter
 
 def getParemeter(sentence):
     parameter = None
+    key = ""
+    value = ""
+    if(isInMethod is True):
+        isLocalParam = True
+    else:
+        isLocalParam = False
     if(sentence[0:1] != "+"):
-        parameter = re.search(r"\`\w+\`:", sentence)
-        if(parameter != None):
-            parameter = parameter.group(0)
-            parameter = re.sub(r"[^\w]", "", parameter)
-    return parameter
+        parameter = re.findall(r"\`(\w+)\`", sentence)
+        if(parameter != []):
+            key = parameter[0]
+            if(len(parameter) >= 2):
+                value = parameter[1]
+    return key, value
 
 def getRequestHeader(sentence):
     header = re.search(r"\w+:", sentence)
@@ -157,22 +175,30 @@ def genHeaders(headers, body):
         })
     return headerList
 
-def genUrl(url):
+def genUrl(url, apiParameter, apiQuery):
+    # print(parameter)
     pathList = url[8:].split("/")
     path = list(filter(None, pathList))
     variable = []
-    for k in path:
-        if(k[0] == ":"):
-            variable.append({
-                "key": k[1:],
-                "value": "{{" + k[1:] + "}}"
-            })
+    query = []
+    for key, value in apiParameter.items():
+        variable.append({
+            "key": key,
+            "value": value
+        })
+    for key, value in apiQuery.items():
+        query.append({
+            "key": key,
+            "value": value,
+            "disabled": True
+        })
 
     return {
         "raw": url,
         "host": "{{url}}",
         "path": path,
-        "variable": variable
+        "variable": variable,
+        "query": query,
     }
 
 def genBody(body):
@@ -182,19 +208,20 @@ def genBody(body):
         "raw": np
     }
 
-def addApi(outputFile, name, url, method, parameter, header, body):
+def addApi(outputFile, name, url, method, parameter, query, header, body):
     outputFile["item"].append({
         "name": name,
         "request": {
             "method": method,
             "header": genHeaders(header, body),
             "body": genBody(body),
-            "url": genUrl(url)
+            "url": genUrl(url, parameter, query)
         }
     })
     return outputFile
 
 def openMultipleFiles(filePath):
+    global paramList
     fileList = os.listdir(filePath)
     for singleFile in fileList:
         currentPath = filePath + '/' + singleFile
@@ -209,14 +236,17 @@ def openMultipleFiles(filePath):
                 apiList = []
                 apiList.append(ApiTemplate("","",""))
                 inAPI = False
+                isInMethod = False
+                isLocalParam = False
                 inParameter = False
                 inRequest = False
                 inHeader = False
                 inBody = False
                 inDataStructure = False
+                collectionName, _, _ = fileName.partition("_api")
                 outputJson = {
                     "info": {
-                        "name": fileName,
+                        "name": collectionName,
                         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
                     },
                     "item": []
@@ -226,8 +256,13 @@ def openMultipleFiles(filePath):
                     # determine this line is in which category
                     if(sentence[0:16] == "# Data Structure"):
                         inDataStructure = True
-                    if(sentence[0:2] == "##" and inDataStructure is False):
+                    if(sentence[0:3] == "###" and inDataStructure is False):
+                        isInMethod = True
                         inAPI = True
+                    elif(sentence[0:2] == "##" and inDataStructure is False):
+                        isLocalParam = False
+                        inAPI = True
+                        isInMethod = False
                     elif(sentence[0:11] == "+ Parameter"):
                         inParameter = True
                     elif(sentence[0:9] == "+ Request"):
@@ -240,11 +275,15 @@ def openMultipleFiles(filePath):
                     if(inAPI):
                         name, path, method, parameter = getAPI(sentence, apiList[-1])
                         apiList.append(ApiTemplate(name, path, method))
-                        apiList[-1].parameter = parameter
+                        if(isLocalParam is False):
+                            apiList[-1].parameter = parameter
                     if(inParameter):
-                        parameter = getParemeter(sentence)
-                        if(parameter != None and re.search(r"optional\)", sentence) == None):
-                            apiList[-1].parameter.append(parameter)
+                        key, value = getParemeter(sentence)
+                        if(key != None):
+                            if(key in paramList):
+                                apiList[-1].parameter[key] = value
+                            else:
+                                apiList[-1].query[key] = value
                     if(inDataStructure):
                         getDataStructure(sentence)
                     if(inRequest):
@@ -277,6 +316,8 @@ def openMultipleFiles(filePath):
                                 if(bodyObj != None):
                                     apiList[-1].body[body] = {"waitObject": bodyObj.group(1)}
                 deleteIndexList = []
+                for api in apiList:
+                    api.query.pop("", None)
                 for index, api in enumerate(apiList):
                     if(api.method == ""):
                         deleteIndexList.append(index)
@@ -291,7 +332,7 @@ def openMultipleFiles(filePath):
                         apiList[index].body = req_body
 
                 for api in apiList:
-                    outputJson = addApi(outputJson, api.name, api.path, api.method, api.parameter, api.header, api.body)
+                    outputJson = addApi(outputJson, api.name, api.path, api.method, api.parameter, api.query, api.header, api.body)
 
                 with open(fileName +".json", "w") as fp:
                     json.dump(outputJson, fp, indent=2, ensure_ascii=False)
