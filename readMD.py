@@ -67,6 +67,8 @@ def getParemeter(sentence):
     parameter = None
     key = ""
     value = ""
+    global isLocalParam
+    global isInMethod
     if(isInMethod is True):
         isLocalParam = True
     else:
@@ -218,6 +220,14 @@ def addApi(outputFile, name, url, method, parameter, query, header, body):
 def openMultipleFiles(filePath):
     global paramList
     fileList = os.listdir(filePath)
+    global inAPI 
+    global isInMethod 
+    global isLocalParam
+    global inParameter
+    global inRequest 
+    global inHeader
+    global inBody
+    global inDataStructure
     for singleFile in fileList:
         currentPath = filePath + '/' + singleFile
         if(os.path.isdir(currentPath)):
